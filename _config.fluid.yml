@@ -111,7 +111,7 @@ deploy:
 # Fuid themes
 ## Docs: https://hexo.fluid-dev.com/docs/guide
 navbar:
-  blog_title: littlestar
+  blog_title: little_star
 lazyload:
   enable: true
   onlypost: false
