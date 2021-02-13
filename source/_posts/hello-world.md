@@ -36,3 +36,6 @@ $ hexo deploy
 ```
 
 More info: [Deployment](https://hexo.io/docs/one-command-deployment.html)
+
+### 一键构建部署 命令
+hexo d -g 
