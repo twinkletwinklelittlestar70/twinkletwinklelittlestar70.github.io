@@ -72,5 +72,7 @@ Intelligent System这个项目在一众GRE要求中鹤立鸡群，与众不同�
 
 由于焦虑，我们肯定是各种加群，各种认识申请的同学，然后互相打气，回想起来这段经历也还蛮好玩儿的。现在我的微信列表里还有很多等offer的小伙伴，希望他们也顺顺利利，拿下Dream School！
 
+祝大家心想事成！啾咪～
+
 
 <img src="../../../../images/money_offer.jpg" style="width: 40%;"/>
