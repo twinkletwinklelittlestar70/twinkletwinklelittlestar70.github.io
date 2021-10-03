@@ -1,0 +1,9 @@
+[submodule "hermes"]
+	path = hermes
+	url = https://github.com/seebeen/hermes
+[submodule "hexo/hermes"]
+	path = hexo/hermes
+	url = https://github.com/seebeen/hermes
+[submodule "themes/hermes"]
+	path = themes/hermes
+	url = https://github.com/seebeen/hermes
