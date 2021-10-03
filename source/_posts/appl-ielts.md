@@ -20,7 +20,7 @@ layout: application 2021fall IELTS
 所有的水平测试备考的第一步都是最重要的，那就是要确认你的目标水平和现有水平。这是制定整个备考计划的基础，有助你精确分配时间到每一科的提升上。制定计划的全过程，请找一个在线文档工具（推荐，好修改，不习惯屏幕用A4纸也行），写下你的计划和目标。后续复习中的所有方法步骤和资料都可以汇总到这个文档里，方便进行进度管理。
 
 分享一下我的备考文档目录：
-<img src="../../../../images/ielts2.jpg" style="width: 80%; margin: 20px;"/>
+<img src="../../../../images/ielts2.jpg" style="height: 20em; margin: 20px;"/>
 
 我的备考计划[完整链接](https://tj98q85t21.feishu.cn/docs/doccnjpiAgiU1tcV548cJktWNIc)
 

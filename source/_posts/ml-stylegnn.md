@@ -18,7 +18,7 @@ Next, I will start with the first problem I encountered, and gradually explain h
 
 I copied the demo from github first, installed the dependencies and run it. The first error is as follows.
 
-```
+```python
 Error : module 'tensorflow' has no attribute 'Dimension' 
 ```
 
@@ -37,7 +37,7 @@ The solution is also very simple. I first download the file and upload it to goo
 
 The previous code.
 
-```
+```python
 url = 'https://drive.google.com/uc?id=1MEGjdvVpUsu1jB4zrXZN7Y4kBBOzizDQ'
     with dnnlib.util.open_url(url, cache_dir=config.cache_dir) as f:
         _G, _D, Gs = pickle.load(f)
@@ -45,7 +45,7 @@ url = 'https://drive.google.com/uc?id=1MEGjdvVpUsu1jB4zrXZN7Y4kBBOzizDQ'
 
 Modified code.
 
-```
+```python
     url = './models/karras2019stylegan-ffhq-1024x1024.pkl' # karras2019stylegan-ffhq-1024x1024.pkl    
     _G, _D, Gs = pickle.load(open(url, 'rb'))
 ```
@@ -58,7 +58,7 @@ After solving the problem above, the next error arrives immediately of course. I
 The requested device appears to be a GPU, but CUDA is not enabled.
 ```
 
-I am pretty new to colab and the first idea comes to me is to make sure my GPU configuration of colab. But it looked fine. And I thought CUDA mush be the problem. Following the env requirements on the project github READ.me file. I tried to install CUDA 9.0 instead but it didnot work. Then I thought this might be a compatibility issue between tensorflow version and CUDA. So I tried more different versions. Not surprisingly, the error was still being reported.
+I am pretty new to colab and the first idea came to me is to make sure my GPU configuration of colab. But it looked fine. And I thought CUDA mush be the problem. Following the env requirements on the project github READ.me, I tried to install CUDA 9.0 instead but it didnot work. Then I thought this might be a compatibility issue between tensorflow version and CUDA. So I tried more different versions. Not surprisingly, the error was still being reported.
 
 Desperate, I read the error report carefully. It was mentioned in the error that tensorflow tried to find the GPU, but did not find a runnable one.
 
@@ -68,14 +68,14 @@ Cannot assign a device for operation Gs_4/_Run/Gs/latents_in: node Gs_4/_Run/Gs/
 
 So in colab environment, is the GPU really available? This time, I googled the official [document of tensorflow](https://www.tensorflow.org/guide/gpu): "how to confirm the GPU situation". 
 
-```
+```python
 import tensorflow as tf
 print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 ```
 
 And that really save my life! It turns out that my tensorflow cannot access an available GPU. This is the reason for the error. After knowing the reason for the error, everything went well. I quickly figured out that this was because I reinstalled tensorflow. The correct approach should be to modify the tensorflow version with the environment variable colab exported.
 
-```
+```python
 %tensorflow_version 1.x
 ```
 
@@ -99,7 +99,7 @@ At the end I would love to share some interesting knowledge I have learned in th
 
 * It is really important to read the error report carefully and analyze the possibility :).
 
-Actually there are some minor errors reported during the operation that is not included in this article cos I believe that all engineers can solve them quickly and happily. :) ~
+Actually there are some minor errors reported during the operation, but they are not included in this article cos I believe that all engineers can solve them quickly and happily. :) ~
 
 (Good good study and day day up! Bye~~)
 

@@ -42,7 +42,7 @@ external_link:
 filename_case: 0
 render_drafts: false
 post_asset_folder: false
-relative_link: false
+relative_link: true
 future: true
 highlight:
   enable: true
@@ -99,7 +99,8 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 ## Fluid themes: https://github.com/fluid-dev/hexo-theme-fluid
-theme: fluid
+## Light themes: https://github.com/hexojs/hexo-theme-light
+theme: hermes
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
