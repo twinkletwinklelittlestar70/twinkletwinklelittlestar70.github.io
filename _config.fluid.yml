@@ -4,7 +4,7 @@
 
 # Site
 title: littlestar
-subtitle: 'A Geek Girl'
+subtitle: 'HEY WELCOME!'
 description: ''
 keywords:
 author: Lin
@@ -118,4 +118,4 @@ lazyload:
 index:
   slogan:
     enable: true
-    text: A Geek Girl
+    text: HEY WELCOME!
