@@ -1,5 +1,6 @@
 ---
 title: 【留学申请】NUS MTech in Intelligent System 从选校到收offer的攻略分享
+date: 2021-04-04 17:01:34
 layout: application nus
 ---
 

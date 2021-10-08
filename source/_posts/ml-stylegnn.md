@@ -1,5 +1,6 @@
 ---
 title: Using a pretrained model to generate fake faces
+date: 2021-10-04 17:01:34
 layout: MachineLearning Deepfake StyleGan
 ---
 
