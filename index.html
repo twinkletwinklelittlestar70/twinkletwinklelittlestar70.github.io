@@ -1,0 +1,167 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> littlestar</title><meta name="description" content="A Blog Powered By Hexo"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="css/hermes.css"><link rel="search" type="application/opensearchdescription+xml" href="https://twinkletwinklelittlestar70.github.io/atom.xml" title="littlestar"><meta name="generator" content="Hexo 5.3.0"><link rel="alternate" href="atom.xml" title="littlestar" type="application/atom+xml">
+</head><body><div class="wrap"><header><a class="logo-link" href="index.html"><img src="favicon.png" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a class="nav-list-link active" href="index.html" target="_self">BLOG</a></li><li class="nav-list-item"><a class="nav-list-link" href="https://github.com/twinkletwinklelittlestar70" target="_blank">GITHUB</a></li><li class="nav-list-item"><a class="nav-list-link" href="archives/" target="_self">ARCHIVE</a></li></ul></header><main class="container"><ul class="home post-list"><li class="post-list-item"><article class="post-block"><h2 class="post-title"><a class="post-title-link" href="2021/10/08/ml-stylegnn/">Using a pretrained model to generate fake faces</a></h2><div class="post-info">Oct 8, 2021</div><div class="post-content"><p>This article is to record my experience of 4 hours struggling with an easy script and hope it can help engineers like me to run this pre-trained model. Actually it is easy by the way, but I found there are so many engineers were searching these same problems again and again, but I have not found the answers online.</p>
+<p>So here I am!</p>
+<h2 id="The-github-project"><a href="#The-github-project" class="headerlink" title="The github project"></a>The github project</h2><p>My plan is to run a StyleGAN model to generate some fake faces and I find this owsome <a target="_blank" rel="noopener" href="https://github.com/NVlabs/stylegan">github repo</a>. According to the demo code, this model can automatically generate a fake face without any other user data, which perfectly meets my needs. Not to mention that it has perfect paper support and simple API calls. After comparing several projects, I think this is the model I am looking for.</p>
+<p>Since I don’t have relevant hardware facilities locally (the GPU and CUDA), I planned to run the model on colab, which did not seem difficult. However, I ran into some problems.</p>
+<p>Next, I will start with the first problem I encountered, and gradually explain how I discovered the problem, looked for a solution, and finally solved the problem. If you are just looking for a perfect colab running solution, you can directly access my <a target="_blank" rel="noopener" href="https://colab.research.google.com/drive/1O2iA3M6AM1rTzdvozIa8wp0moCoeTYk6?usp=sharing">colab file</a> and run it smoothly.</p>
+<h2 id="Tensorflow-version"><a href="#Tensorflow-version" class="headerlink" title="Tensorflow version"></a>Tensorflow version</h2><p>I copied the demo from github first, installed the dependencies and run it. The first error is as follows.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error : module <span class="string">&#x27;tensorflow&#x27;</span> has no attribute <span class="string">&#x27;Dimension&#x27;</span> </span><br></pre></td></tr></table></figure>
+<p>And thanks to google, I found the <a target="_blank" rel="noopener" href="https://github.com/cedricoeldorf/ConditionalStyleGAN/issues/3">solution</a> easily by just reinstalling tensorflow v1.15.2.</p>
+<h2 id="Colab-download-error"><a href="#Colab-download-error" class="headerlink" title="Colab download error"></a>Colab download error</h2><p>As expected, I immediately encountered the next error. :)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Colab Google Drive quota exceeded</span><br></pre></td></tr></table></figure>
+<p>Copy the error into the google search box, the first result is the issue from colab toolkit github. After reading the code and the issue page, the solution quickly come into my mind. The error happened because the model file is a little large and google colab thinks that I have exceeded the download limit.</p>
+<p>The solution is very simple. I download the file and upload it to google drive, so the model can be loaded locally from the drive, and colab does not think this is counted in the download.</p>
+<p>The previous code.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">url = <span class="string">&#x27;https://drive.google.com/uc?id=1MEGjdvVpUsu1jB4zrXZN7Y4kBBOzizDQ&#x27;</span></span><br><span class="line">    <span class="keyword">with</span> dnnlib.util.open_url(url, cache_dir=config.cache_dir) <span class="keyword">as</span> f:</span><br><span class="line">        _G, _D, Gs = pickle.load(f)</span><br></pre></td></tr></table></figure>
+<p>The Modified code.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">url = <span class="string">&#x27;./models/karras2019stylegan-ffhq-1024x1024.pkl&#x27;</span> <span class="comment"># karras2019stylegan-ffhq-1024x1024.pkl    </span></span><br><span class="line">_G, _D, Gs = pickle.load(<span class="built_in">open</span>(url, <span class="string">&#x27;rb&#x27;</span>))</span><br></pre></td></tr></table></figure>
+<h2 id="GPU-amp-CUDA"><a href="#GPU-amp-CUDA" class="headerlink" title="GPU &amp; CUDA"></a>GPU &amp; CUDA</h2><p>After solving the problem above, the next error arrives immediately of course. It looks like this.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The requested device appears to be a GPU, but CUDA is not enabled.</span><br></pre></td></tr></table></figure>
+<p>I am pretty new to colab and the first idea came to me is to make sure my GPU configuration of colab. But it looked fine. And I thought CUDA mush be the problem. Following the env requirements on the README.md, I tried to install CUDA 9.0 instead but it did not work. Then I thought this might be a compatibility issue between tensorflow and CUDA. So I tried more different versions. Not surprisingly, the error was still being reported.</p>
+<p>Desperate, I read the error report carefully. It was mentioned in the error that tensorflow tried to find the GPU, but did not find a runnable one.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Cannot assign a device for operation Gs_4&#x2F;_Run&#x2F;Gs&#x2F;latents_in: node Gs_4&#x2F;_Run&#x2F;Gs&#x2F;latents_in (defined at &#x2F;usr&#x2F;local&#x2F;lib&#x2F;python3.7&#x2F;dist-packages&#x2F;tensorflow_core&#x2F;python&#x2F;framework&#x2F;ops.py:1748)  was explicitly assigned to &#x2F;device:GPU:0 but available devices are [ &#x2F;job:localhost&#x2F;replica:0&#x2F;task:0&#x2F;device:CPU:0, &#x2F;job:localhost&#x2F;replica:0&#x2F;task:0&#x2F;device:XLA_CPU:0 ]. Make sure the device specification refers to a valid device. The requested device appears to be a GPU, but CUDA is not enabled.</span><br></pre></td></tr></table></figure>
+<p>So in colab environment, is the GPU really available? I googled the official <a target="_blank" rel="noopener" href="https://www.tensorflow.org/guide/gpu">document of tensorflow</a>: “how to confirm the GPU situation” and get my answer. </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line">print(<span class="string">&quot;Num GPUs Available: &quot;</span>, <span class="built_in">len</span>(tf.config.experimental.list_physical_devices(<span class="string">&#x27;GPU&#x27;</span>)))</span><br></pre></td></tr></table></figure>
+<p>And that really save my life! It turns out that my tensorflow cannot access an available GPU. This is the reason! After knowing the reason for the error, everything went well. I quickly figured out that this was because I reinstalled tensorflow. The correct approach should be to modify the tensorflow version as follows.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%tensorflow_version <span class="number">1.</span>x</span><br></pre></td></tr></table></figure>
+<p>This is what I actually need! I quickly delete those code trying to change CUDA version or python version. And the script was still fine.</p>
+<p>The reason why we need to do this can be found in this <a target="_blank" rel="noopener" href="https://colab.research.google.com/notebooks/tensorflow_version.ipynb">document</a>. And I would copy the points as follows.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Avoid Using pip install with GPUs and TPUs</span><br><span class="line"></span><br><span class="line">We recommend against using pip install to specify a particular TensorFlow version for both GPU and TPU backends. Colab builds TensorFlow from source to ensure compatibility with our fleet of accelerators. Versions of TensorFlow fetched from PyPI by pip may suffer from performance problems or may not work at all.</span><br></pre></td></tr></table></figure>
+<h2 id="The-end"><a href="#The-end" class="headerlink" title="The end"></a>The end</h2><p>At the end I would love to share some interesting knowledge I have learned in these four hours. A better understanding of colab will help us find problems faster.</p>
+<ul>
+<li><p>When running Notebook, colab will create a virtual machine environment, you can basically use it as an ubuntu machine.</p>
+</li>
+<li><p>If there are a lot of files that need to be loaded from google drive, such as an image data set, the best pratice is to read a zip package from the drive and decompress it in the running virtual machine. This will greatly speed up the data reading speed.</p>
+</li>
+<li><p>It is really important to read the error report carefully and analyze it :).</p>
+</li>
+</ul>
+<p>Actually there are some minor errors reported during the process, but they are not included in this article cos I believe that you are smart enough to solve them quickly and happily. :) ~</p>
+<p>Thank you for reading and wish you a nice day. Bye~~</p>
+</div></article></li><li class="post-list-item"><article class="post-block"><h2 class="post-title"><a class="post-title-link" href="2021/10/08/hello-world/">Hexo Command</a></h2><div class="post-info">Oct 8, 2021</div><div class="post-content"><p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<h3 id="一键构建部署-命令"><a href="#一键构建部署-命令" class="headerlink" title="一键构建部署 命令"></a>一键构建部署 命令</h3><p>hexo d -g </p>
+</div></article></li><li class="post-list-item"><article class="post-block"><h2 class="post-title"><a class="post-title-link" href="2021/10/08/appl-ielts/">一个月搞定雅思！分享我的考试攻略</a></h2><div class="post-info">Oct 8, 2021</div><div class="post-content"><p>这篇文章写于2020年10月，最开始是希望在知乎上给大家分享一下我的雅思经历和备考方法，现在整理到博客上，也算是给自己的备考生涯留个纪念啦！以下是原文。</p>
+<hr>
+<p>恕我直言，6.5分的目标就不要看机构老师卖课推广的文章啦～ 6.5的最低分是两个6.5，两个6.0，都是合格分，想要从更低的水平达到6.5老师帮不了你的，要靠自己！本文适合英语基础差（不偏科，啥都差），雅思需要短时间内（一个月）突击到6.5分（小分6.0）的同学关注。</p>
+<p>最近刚刚实践一个月突击雅思6.5的全过程，按国际惯例，先放上成绩截图。</p>
+<img src="../../../../images/ielts1.png" style="width: 80%; margin: 20px;"/>
+
+<p>没错，刚好<strong>压线6.5</strong>！如果有更高追求的同学，本文经验就不适合你啦。如果跟我一样抱着“分不在高，够用就行”的目的来参加雅思，请相信本文能给你的复习效率带来飞跃提升。</p>
+<ul>
+<li>应试第一步：确认目标和距离，制定备考计划。</li>
+</ul>
+<p>所有的水平测试备考的第一步都是最重要的，那就是要确认你的目标水平和现有水平。这是制定整个备考计划的基础，有助你精确分配时间到每一科的提升上。制定计划的全过程，请找一个在线文档工具（推荐，好修改，不习惯屏幕用A4纸也行），写下你的计划和目标。后续复习中的所有方法步骤和资料都可以汇总到这个文档里，方便进行进度管理。</p>
+<p>分享一下我的备考文档目录：<br><img src="../../../../images/ielts2.jpg" style="height: 20em; margin: 20px;"/></p>
+<p>我的备考计划<a target="_blank" rel="noopener" href="https://tj98q85t21.feishu.cn/docs/doccnjpiAgiU1tcV548cJktWNIc">完整链接</a></p>
+<ul>
+<li>收集备考资料</li>
+</ul>
+<p>网上的雅思资料可以说是非常非常多了，但如果希望一个月内完成整个复习流程，看完所有资料肯定不现实。对于突击水平考试来说，资料的性价比最重要，大家要追求用最短的时间最高效率地提分！分享一下我的备考资料：</p>
+<ul>
+<li><p>单词：扇贝单词app （词表：王陆807雅思词汇（听力））</p>
+</li>
+<li><p>在线真题（免费，机考专用）<a target="_blank" rel="noopener" href="https://ieltsonlinetests.com/ielts-exam-library">https://ieltsonlinetests.com/ielts-exam-library</a></p>
+</li>
+<li><p>听力：在线真题 + 王陆听力语料库（网上下载pdf + 朗易思听app）</p>
+</li>
+<li><p>阅读：在线真题 + 剑桥11-15（诚实地说，买这么多本我只做了两篇test…）</p>
+</li>
+<li><p>写作：B站 + 知乎 + 顾家北写作</p>
+</li>
+<li><p>口语：学为贵app + 知乎</p>
+</li>
+</ul>
+<p>以上资料，除了剑桥真题，其他均为免费。甚至剑桥真题也可以免费，不过有条件还是建议大家支持正版哈～</p>
+<p>以上资料就足够大家到6.5了，<strong>讲道理一个月也用不上更多的资料</strong>。各种机构的老师辅导呀都是更高分才需要的，<strong>对于6.5这种比较基础的分数要求，辅导老师的用处不大</strong>，并且沟通的时间还可能拖慢你的复习计划。</p>
+<ul>
+<li>资料使用和复习方法（单词）</li>
+</ul>
+<p>单词在一个月突击的时间里，推荐背诵《王陆807雅思词汇（听力）》词表。用哪个单词app都行，一个星期内每天花两个小时把词表背完即可。我用的扇贝app，功能都齐全。一个星期备考，目标只是6.5的话，就不要想什么“单词是一切基础”了=。= 好好学英语的事很重要，但不是你这一个月要操心的，雅思考试可是已经报名啦。</p>
+<ul>
+<li>资料使用和复习方法（听力）</li>
+</ul>
+<p>听力复习包含两部分，一个是做真题 + 精听真题。第二个是单词听写。按以下方法复习后，每天或者隔天做真题保障手感就可以了，合理安排各part时间。</p>
+<ol>
+<li>做真题 + 精听真题</li>
+</ol>
+<p>用雅思真题材料（笔试就用剑桥真题的书，机考就用ieltsonline那个真题网站），计时做题中间不做任何停顿，把section1-section4做完。然后使用五步精听法，挑至少一篇精听完，并在第二天早上复习一遍。（五步精听法是我看知乎上其他同学总结的，请大家自行搜索并一起给原文作者同学点个赞！）</p>
+<ol start="2">
+<li>单词听写</li>
+</ol>
+<p>单词听写主要是培养大家听写的灵敏度。形成条件反射，听到音节先拼写再回忆单词意思。这个反射顺序很重要，听力考试时留给拼写的时间可能很短，先写出来最重要！</p>
+<p>听写材料就是《王陆听力语料库》这本书，请先看序章了解这本书的使用方法。并按照书上的指南按优先级顺序使用，一个月大家能把3、4、5 、11章听写完就很了不起了，高效率的同学可以根据指南反复听写直到正确率95%，你的听力肯定就不止6.5了。个人建议不用到这么高的正确率，可以把时间花在其他part上。（作为参考：我只听了3、4章一遍，正确率大约60%，成绩6.5）</p>
+<ul>
+<li>资料使用和复习方法（阅读）</li>
+</ul>
+<p>阅读我相信是大部分国内同学的强项，我只用了一个众所周知、大名鼎鼎的方法：同义词替换法。具体方式请自行知乎搜索或者看《刘洪波阅读真经》这本书。大家学习同义词替换法后，不断做真题运用到日常的做题中，形成找同义词的做题反射，阅读6.5保底。</p>
+<ul>
+<li>资料使用和复习方法（写作）</li>
+</ul>
+<ol>
+<li>小作文</li>
+</ol>
+<p>小作文强烈推荐知乎<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/83528343">这篇文章</a>.这个老师太实在了，总结得贼棒，还免费！没有上过这个老师的课，但这篇task1攻略真的很靠谱！学习加实践，只要三天就能掌握task 1 核心技巧。</p>
+<p>建议大家在学习这篇总结的时候，自己再归纳总结一遍，能更好地消化。这篇文章里没有地图题和流程图的介绍，应该是需要付费上课获取的资料。但其实这两种类型的task1顾家北书里有介绍，大家也不用到处找其他资料了。</p>
+<ol start="2">
+<li>大作文</li>
+</ol>
+<p>大作文很多同学都在背范文，其实根本没必要，<strong>6这个分数段根本不是靠背范文写上去的</strong>。词藻再华丽，没有逻辑或者跑题的作文就是5.5。相反，词汇和句子没有很复杂的变化（还是至少要有从句），但结构清晰逻辑扣题的作文，6.0很稳的。</p>
+<p>写作拿到6分的关键就是<strong>逻辑和结构</strong>。只要行文有逻辑，语法错误不过分，单词拼写错误不过分，你就是6.0。写作我用的材料是：大名鼎鼎的《顾家北》这本书。这本书的<strong>一周速成使用方法</strong>给大家介绍一下。</p>
+<p>这本书把大作文分成了五大类：论述类、观点类（单一观点）、观点类（多观点）、报告类和混合类。每章节介绍一种类型，并附上翻译练习 + 范文修改 + 类型总结。一个星期作文备考时间，你不需要做翻译练习和范文修改，请直接看每章的类型总结！总结里包含每种类型的<strong>识别方法</strong>（题目问句不同）、<strong>主体段分段方法、段内结构</strong>。每种技巧都有非常明确的指南和详细解释。掌握作文分类和写法就能保证不跑题有逻辑，6.0就有了。</p>
+<p>建议大家在阅读这本书的时候自己写总结，能够更好地消化知识点。</p>
+<p>分享<a target="_blank" rel="noopener" href="https://tj98q85t21.feishu.cn/docs/doccndLxQUzrM9brrUK2MmXSeTh#">我的作文备考总结</a></p>
+<p>单看知识点可能很难跟实践结合，推荐一个B站小姐姐（up主：丸子tinateena）的<a target="_blank" rel="noopener" href="https://b23.tv/0mdrkE">高分写作教程</a>，手把手教大家实践。B站上还有很多其他高质量的雅思up主，就不一一推荐啦，大家可以自行搜索，对照着顾家北的总结来学习。</p>
+<ul>
+<li>资料使用和复习方法（口语）</li>
+</ul>
+<p>口语推荐学为贵app。这个app可太好了，虽然大家都是卖课，但我用了这个app后，老师亲自加微信给我发口语复习资料….还是免费的。虽然我的目标是6.0，到不了需要给老师交钱上课的水平，但免费的口语题库还是太感人了！</p>
+<p>口语复习到6.0只要达到能对话的水平就行，口音不重要，不至于到考官听不懂的程度就不用特意练习语音语调了。分享我的复习技巧：1. 练习几个万能拖延时间的句子来替代emmm（例如well you know…）。2. 对照题库把你的中文答题思路写出来，并翻译成英文句子（不用很复杂，能用宾语从句就够了），然后通过提取关键词来背诵。技巧在于你的回答应该是有逻辑的，这样背起来不吃力，句子结构可以自由发挥。</p>
+<p>口语考试要到6.0最重要的还是心态。“我是交了2000+来享受口语老师的服务的”，这种心态就很不错。避免紧张造成的脑子空白，要把紧张换成兴奋的感觉，争取balabala瞎说一通也很自信～</p>
+<ul>
+<li>备考心态（重要）</li>
+</ul>
+<p>如果只是求一个最低分6.5的分数，备考心态千万不要很焦虑！大可不必啊朋友！战术上重视，战略上放轻松是最好的心态。我个人经验是，不必强迫自己每天学xx小时，甚至到学不够时间晚上焦虑到睡不着的程度。这样的状态，就算只复习一个月，心态也崩了，身体也不好了。</p>
+<p>建议大家催眠自己相信，一个月求一个及格分是一件正常努力就可以做到的事！（大学里试过三天从零复习一门课60飘过的朋友们都明白我在说什么）。任何水平考试（而不是排名考试），都是设置了大部分人易过的及格线的，雅思也一样。只求6.5真的不需要焦虑好吗朋友们！</p>
+<p>最后，写这么多不来个赞赏吗？😭</p>
+<img src="../../../../images/ielts3.jpg" style="width: 40%;"/>
+
+<p>祝大家都能考出个好成绩！啾咪～</p>
+</div></article></li><li class="post-list-item"><article class="post-block"><h2 class="post-title"><a class="post-title-link" href="2021/10/08/appl-nus-is/">【留学申请】NUS MTech in Intelligent System 从选校到收offer的攻略分享</a></h2><div class="post-info">Oct 8, 2021</div><div class="post-content"><p>2021fall申请季已经逐渐到尾声，经过了半年的全职准备，我终于收获了第一志愿新加坡国立大学的offer。收到offer的那天，感觉自己半年来的努力和惶恐都有了回报，一切都值得了。新加坡国立大学的计算机系（SOC）大家都知道很好，但同时入学要求也特别高，需要考G。我申请的是一个更匹配我条件的项目——Intelligent System。这个项目可能很多人没听过，但这其实是个入手不亏的宝藏项目，它更工作导向，重视实践经验，适合有工作经验不打算读博的同学申请。</p>
+<p>想给大家分享一下我的申请经历是因为，我在半年里从往年的同学分享中获取了很多信心和力量。如今我申请成功了，也希望能为以后的同学提供一点点帮助。下面我从确定目标到收offer，给大家分享一下每个环节的攻略。时间线标注在小标题后.</p>
+<h2 id="确定留学目标（2020-07-2020-08）"><a href="#确定留学目标（2020-07-2020-08）" class="headerlink" title="确定留学目标（2020.07 - 2020.08）"></a>确定留学目标（2020.07 - 2020.08）</h2><p>我是在20年7月的时候诞生了留学的想法，当时我刚好本科毕业三年整，到了需要往下进行职业规划的时间节点。回顾我的三年职业生涯，我觉得按照我目前的线路，无法在未来30年为我带来稳定的收入和乐趣。于是，留学的想法就诞生了。我立刻着手辞职交接，八月中正式离职备考雅思。</p>
+<p>但无论是本科应届毕业生，还是工作后重新出发的申请人，我都建议大家一定要先想好自己留学的目标是什么。为了获取学历？为了一份留学体验？为了海归的光环？还是为了获取应届生身份？我们的目标决定着我们要如何进行选校，千万不要还没想清楚就胡乱开始。</p>
+<h2 id="中介-OR-DIY？如何选校？（2020-10）"><a href="#中介-OR-DIY？如何选校？（2020-10）" class="headerlink" title="中介 OR DIY？如何选校？（2020.10）"></a>中介 OR DIY？如何选校？（2020.10）</h2><p>在整个申请季的开始，申请学生面临的第一个问题就是中介 OR DIY？我在网上经常看到这个问题。我理解提出这个问题主要是对未知的恐惧，申请人都担心自己没有全局的视野，如果错过了申请时机，做错了什么，就会与成功失之交臂。但我个人建议大家毋需害怕，中介通常也没有全局视野。何况轻度焦虑是必然会发生的，如何调整好心态，给自己信心，是整个留学过程中我们都要面对的挑战。</p>
+<p>我是从七月开始找申请过的同学开始了解他们的项目，并在网上海量搜索信息。最终找到了一个同学录取了NUS IS，正准备上网课。虽然我们不太熟悉，但我还是厚着脸皮问了很多问题。通过更多的了解，我确定了我的第一志愿就是这个项目。学术氛围、就业环境和申请体验，这些信息大部分是一般中介无法告诉我们的，但它们其实更重要。比如我同学告诉我，NUS ISS的小米非常友好，如果有缺少信息的情况会邮件通知申请人，所以在网申过程中并不需要太焦虑，容错率非常高，不存在你填错了就out的情况。</p>
+<p>留学中介在互联网信息不够丰富的时候，通过信息渠道赚取信息差费用，但如今这个优势已经不复存在了。只要动动手指，善用搜索引擎，我们每个人都可以获得准确的信息，筛选出心仪的学校和项目。这里我推荐几个前期搜索信息筛选学校的渠道：</p>
+<ol>
+<li>往届同学。因为同学常常有相似的学术背景和专业能力，通过对比往届同学，我们能快速定位到自己在茫茫留学申请人中的位置。并且可以通过访问往届同学，了解到项目的就读体验等主观信息。</li>
+<li>寄托网站。寄托网站上有广大的offer榜分享，大家可以通过对比自己相似的bg去找准女神校和保底校。</li>
+<li>QS等权威排名。这里不讨论QS排名的合理性和权威性，但以QS、THE、TIME为代表的一系列排名能够粗略地反映出学校的整体水平。第三十和第四十名不一定谁更适合你，但第五十和第一百五十的区别度就很明显了。</li>
+<li>知乎等分享网站。以知乎为例，网上有大量的留学分享数据。虽然大部分都是中介广告，但通过海量中介分享的数据也能快速地为自己找准定位。</li>
+</ol>
+<h2 id="雅思刷到多少满意？要考G吗？（2020-09）"><a href="#雅思刷到多少满意？要考G吗？（2020-09）" class="headerlink" title="雅思刷到多少满意？要考G吗？（2020.09）"></a>雅思刷到多少满意？要考G吗？（2020.09）</h2><p>如果直接问中介，中介肯定都是告诉你雅思越高越好呀，G当然要考这是个加分项。这个回答放在所有留学生人群中肯定是一个普适的答案，但不一定就是适合你的答案。事实上，当你确定好你的选校和项目范围后，所有的信息都在官网上摆着。你很快就会发现每个项目都不同，有些需要7.0雅思，还要求小分6.0，有些只要6.0还没有小分要求。如果一个中介直接告诉你国立大学雅思要求6.5以上而你只有6.0只能放弃，不就被坑了吗？事实上，不少专业只要求6.0。</p>
+<p>如果你有其他亮点，英语成绩不是你的强项，和我一样，那我的建议是也不用一直逼自己刷高分，够到你心仪的学校录取要求就行。我自己是第一次考了6.5(6.0)就没考了，刚好够到南洋理工AI program的门槛，也根本没考G。因为我知道我英语没多好，多努力也就最多刷到7。GRE和GMAT更是本科知识都忘差不多了，备考起来花时间花精力，还很难短时间内取得好成绩。而我的核心竞争力是我的三年工程经验，花多点时间写好简历项目介绍才是正事。</p>
+<p>留学季时间紧张的情况下，多考虑投入产出比，多考虑自己的优势，尽量从招生办的角度审视自己的背景。这可能对没有工作经验的同学有点困难，但有招聘经验的同学应该能理解我的意思。</p>
+<h2 id="文书准备（2020-10-2020-11）"><a href="#文书准备（2020-10-2020-11）" class="headerlink" title="文书准备（2020.10 - 2020.11）"></a>文书准备（2020.10 - 2020.11）</h2><p>上面说到要从招生办的角度审视自己的背景，这是帮助同学们决策自己的发力点是哪里，那如果找不到自己特别的亮点应该怎么发力？从网上的分享来看，可以从文书下手发力。</p>
+<p>我自己的亮点不在文书，但我的项目经历需要通过良好的表达，才能给招生办留下好印象，所以我仍然在文书上下了大功夫。我是在知乎上找了几个文书中介，最终对比筛选出了WordSunny。这个文书机构案例比较多并且机构定位与我的需求很契合。在中介帮我们找文书老师的时候，想清楚自己的需求并表达清楚也很重要。通过沟通，我最终找了一个确保有时间跟我交流，同时有计算机背景交流起来不费力的NUS毕业校友来帮助我完成文书（张骄老师）。</p>
+<p>这里夸奖一下张骄老师，我们沟通起来还是非常顺利的。前期我们通过文档沟通，后期周末约时间zoom，整体节奏非常舒服。能感觉到老师在认真地完成这个工作，并且包含了他的经验指导，而不是流水线生产。</p>
+<p>最开始，WordSunny这边有标准化的表格来帮助我们梳理自己的思路和信息，这个表格一定要尽可能地详细，千万不能敷衍。我们作为申请人自己都敷衍，老师就更会无从下手。当文书（CV、PS）第一版出来后，我们必须仔细地阅读。一般来说不可能根据文案写的就很完美，毕竟文字沟通始终有gap。这个时候可以跟老师一起约个时间，视频一下，根据第一版从头到尾梳理一遍修改点，并描述清楚问题在哪，为什么想这么改。申请人知道自己想表达的内容和塑造的形象，老师知道如何表达更恰当，只有通过多沟通，才能一起完成一份满意的文书。</p>
+<p>最终我就用这一份文书，修改替换一些关键词，投遍了申请季的所有项目。费用贵是真的贵，但最终感觉还是值得吧。我在网上看到有一些同学也用了WordSunny的服务，但并没有很理想的结果。我还是强调一下我给同学们的建议，没有足够的沟通，文书老师只能凭想象构筑空中楼阁，结果一定会与你想象的不同。只有有效率有用的沟通，才能得到理想的结果，这里没有捷径可以走。</p>
+<h2 id="递交申请（2020-11-2020-12）"><a href="#递交申请（2020-11-2020-12）" class="headerlink" title="递交申请（2020.11 - 2020.12）"></a>递交申请（2020.11 - 2020.12）</h2><p>递交申请完全是个体力活，我从第一个项目最开始官网点进去找不到项目，到最后20分钟申请完一个项目，进化神速。其实真正需要花时间去熟悉的只有第一个项目，后面有经验了都是大同小异。所以我推荐大家在第二个申请自己的dream school，这样避免了完全没经验，也不至于到后面都麻木随意投。<br>最开始申请，推荐看知乎的“假洋鬼子Kenny”这个答主。常见的好学校都有手把手教学，配图，每一步都很详细，适合完全没经验的同学对照申请。不过这个答主应该也是中介，中介服务我是没用过的，完全不了解。非要说利益相关，那就是我给用过的每个回答都点了赞～</p>
+<p>非要说递交申请有什么经验和策略，我觉得将保底校延后申请是一个挺好的小技巧。众所周知，香港学校滚动录取，所以越早提交越容易被录取。但正是由于滚动录取，如果你很有把握的保底校也很早就提交申请，那你的保底offer也会来得早。而女神校你还在茫茫人海中滚动，要不要交留位费稳住保底学校，就成了一个很尴尬的问题。我自己是全部项目十二月投递，一月初就收到了港理工DSA的offer，8w的留位费令人头秃，挣扎了两个星期拖到最后一天我还是交了。而女神校直到三月才给我发offer，目前为止其他学校还没动静，没有offer也没有拒信。如果港理工拖到一月再提交申请，可能我就省了8w。</p>
+<h2 id="笔试和面试（2021-01-2021-03，一月底笔试，二月初面试）"><a href="#笔试和面试（2021-01-2021-03，一月底笔试，二月初面试）" class="headerlink" title="笔试和面试（2021.01 - 2021.03，一月底笔试，二月初面试）"></a>笔试和面试（2021.01 - 2021.03，一月底笔试，二月初面试）</h2><p>Intelligent System这个项目在一众GRE要求中鹤立鸡群，与众不同，它要自己出题考试。于是，如何准备笔试也是一个令人头疼的问题。官方给了样题，样题就只有一套，年年都一样，网上也完全没有题库。那就只能从样题入手分析了。我做了一遍样题，并将每道题的考察点列出来查漏补缺。<br><img src="../../../../images/is_sample.png" style="width: 80%; margin: 20px;"/><br>列出知识点后，就是统计题型和制定做题策略。<br><img src="../../../../images/is_sample2.png" style="width: 80%; margin: 20px;"/><br><img src="../../../../images/is_sample3.png" style="width: 80%; margin: 20px;"/></p>
+<p>最终笔试的时候要比我想象的顺利很多，除了英文单词题太难一个都不会以外（没办法英语差，而且也来不及复习了。甚至后悔没有直接全选C，还排除法做了很久），其他的题目都比较简单，只要保持一分钟一题的速度，完成考试没有太多的难度。尤其我是IS和SE考试一起考，SE试题过于简单，题量也少，只要真正做过项目的同学都能很顺利答出来的那种。我甚至提前交卷了…</p>
+<p>真正有难度的是面试。纯英语面试对我来说是第一次，我相信对很多申请的同学来说也是。我刚开始也非常焦虑，但是害怕也没用，我通过分析认为，这场面试考察的主要还是技术能力。这个项目需要一定的编程基础和机器学习基础，面试官需要知道你是不是有这些基础，或者说你是不是有自学补齐这些基础的能力。英语水平我认为只是顺便，不影响沟通即可。通过收集资料，我自己写或者收集，共压了24道面试题，面试时也非常幸运地全部都在射程内！<br><img src="../../../../images/is_interview.png" style="width: 30%; margin: 20px;"/></p>
+<p>为了更好地展现我的项目优势，也为了给我的面试增加亮点，我简单地准备了一个keynote来介绍我最出色的两个项目经历。这也是有一些讨巧，在沟通的过程中，用中文描述项目经历就已经很难了，何况是英语。所以使用PPT图表的方式，既不会过多暴露我的英语词汇量匮乏（只是不要进一步放大劣势），又能更准确地传达项目有多牛！最重要的是，老师会认可我为面试做的准备，能够知道这就是我的Dream School！</p>
+<h2 id="等待offer（2021-12-2021-03，三月初offer）"><a href="#等待offer（2021-12-2021-03，三月初offer）" class="headerlink" title="等待offer（2021.12 - 2021.03，三月初offer）"></a>等待offer（2021.12 - 2021.03，三月初offer）</h2><p>讲道理等待offer是整个申请过程中最最最煎熬的时刻了。受到疫情影响，2021年的申请人数特别多，小米（香港的几乎不回复了）也不像往年一样积极回复邮件了。这个时候如何关注周围已录取同学的背景和情况就是我们最关心的问题。我最推荐两个渠道，一个是寄托天下，另一个是知乎留学中介的定期发布（推荐答主：“April学姐”）。再次再次，没用过这些中介啊，不是在推荐这些中介服务。</p>
+<p>由于焦虑，我们肯定是各种加群，各种认识申请的同学，然后互相打气，回想起来这段经历也还蛮好玩儿的。现在我的微信列表里还有很多等offer的小伙伴，希望他们也顺顺利利，拿下Dream School！</p>
+<p>祝大家心想事成！啾咪～</p>
+<img src="../../../../images/money_offer.jpg" style="width: 40%;"/></div></article></li></ul></main><footer><div class="paginator"></div><div class="copyright"><p>© 2019 - 2021 <a href="https://twinkletwinklelittlestar70.github.io">Lin</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/claymcleod/hexo-theme-hermes" target="_blank">hexo-theme-hermes</a>. </p><p>Logo made by <a target="_blank" rel="noopener" href="https://www.flaticon.com/authors/freepik">Freepik</a> from <a target="_blank" rel="noopener" href="https://flaticon.com">www.flaticon.com</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>
