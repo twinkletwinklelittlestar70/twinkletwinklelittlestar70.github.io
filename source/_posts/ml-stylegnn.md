@@ -1,5 +1,5 @@
 ---
-title: Using a pretrained model to generate fake faces
+title: Using NVlabs StyleGAN pretrained model to generate fake faces on Colab
 date: 2021-10-04 17:01:34
 layout: MachineLearning Deepfake StyleGan
 ---
@@ -8,9 +8,9 @@ This article is to record my experience of 4 hours struggling with an easy scrip
 
 So here I am!
 
-## The github project
+## Choose open sourced project
 
-My plan is to run a StyleGAN model to generate some fake faces and I find this owsome [github repo](https://github.com/NVlabs/stylegan). According to the demo code, this model can automatically generate a fake face without any other user data, which perfectly meets my needs. Not to mention that it has perfect paper support and simple API calls. After comparing several projects, I think this is the model I am looking for.
+My plan is to run a StyleGAN model to generate some fake faces and I find an owsome [github repo](https://github.com/NVlabs/stylegan) repo on github open sourced by NVLabs. According to the demo code, this model can automatically generate a fake face without any other user data, which perfectly meets my needs. Not to mention that it has perfect paper support and simple API calls. After comparing several projects, I think this is the model I am looking for.
 
 Since I don't have relevant hardware facilities locally (the GPU and CUDA), I planned to run the model on colab, which did not seem difficult. However, I ran into some problems.
 

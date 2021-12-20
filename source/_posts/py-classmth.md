@@ -4,7 +4,7 @@ date: 2021-10-18 21:17:34
 layout: python multi-thread class-method
 ---
 
-The story begins. I am developing a python flask project today. And I need to provide an interface for the front end to run a model to recognize a set of facial images. 
+Here is the story. I am developing a python flask project today. And I need to provide an interface for the front end to run a model to recognize a set of facial images. 
 
 For a group of ten images, I first developed a single-threaded version to recognize, and the program took 2.4s in total. So I think, will there be optimization for multi-threading? I decided to use two threads and wrote the following code very quickly.
 
