@@ -1,5 +1,5 @@
 ---
-title: An idea to extract fake part of fake news by attention visualization
+title: An idea to extract fake parts of fake news
 date: 2022-05-12 17:57:00
 layout: python machine-learning transformer attention visualization
 ---
