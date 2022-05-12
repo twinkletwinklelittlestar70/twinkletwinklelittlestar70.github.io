@@ -6,7 +6,7 @@ layout: python machine-learning transformer attention visualization
 
 This problem occurred when we were trying to improve a Chatbot user experience. This chatbot is a coursework that supports covid-related Q&A, fake tweet recognition, and rapid diagnosis of covid by cough. For more details refer to the [project repo](https://github.com/twinkletwinklelittlestar70/CovBot).
 
-When doing the practice module of NLP course, we intend to do a recognition for fake news on Twitter about Covid-19. The teacher then suggested that instead of just identifying fake news, we could try to figure out which parts of a tweet hold the fake facts.
+When doing the practice module of NLP course, we intend to do a recognition for fake news on Twitter about Covid-19. The professor then suggested that instead of just identifying fake news, we could try to figure out which parts of a tweet hold the fake facts.
 
 We have fine-tuned a BERT model and obtained its attention output. These steps are easy and there is a lot of information on the web. But how to infer which parts of the original text are fake and which parts are real from the attention data is a very specific problem, I can't find any similar solution on the Internet. And there is even no available code example for attention visualization of any text classification problem.
 
