@@ -1,7 +1,7 @@
 ---
 title: 【快速入门机器翻译（二）】Tansformer 和 注意力机制
 date: 2021-12-20 16:34:00
-layout: python machine-translation machine learning
+layout: python machine-translation machine-learning
 ---
 
 Transformer模型在Google发布的论文“Attention is All You Need”中提出，现在是谷歌云TPU推荐的参考模型。（论文的地址:  [Attention is All You Need](https://arxiv.org/abs/1706.03762)）
