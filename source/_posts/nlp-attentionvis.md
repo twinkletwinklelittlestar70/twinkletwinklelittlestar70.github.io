@@ -16,9 +16,6 @@ So after reading various materials and combining bert-viz and my own understandi
 The most basic idea is that we believe that the fake parts of a tweet is the parts that has the greatest impact on the fake recognition result, that is, the parts with the highest weight in the model attention output. So our problem becomes, how to find the parts with the largest weight from the attention.
 
 ## Understand the attention output
-放huge face的transformer 文档，解释transformer的attention输出的结构。
-
-然后参考bert-viz这个可视化，理解可视化是在做什么
 
 To find the parts with the largest weight, we need to understand the data structure of attention output first. The pre-trained BERT we use is from huggingface and here is the [document of the classifier](https://huggingface.co/docs/transformers/model_doc/bert#transformers.BertForSequenceClassification).
 
